@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from oauth2client.crypt import AppIdentityError
 from social_core.backends.github import GithubOAuth2, GithubOrganizationOAuth2, \
     GithubTeamOAuth2
+from social_core.backends.saml import SAMLAuth
 from social_core.utils import handle_http_errors
 from social_core.exceptions import AuthFailed, SocialAuthBaseException
 from social_django.models import DjangoStorage
@@ -62,6 +63,9 @@ def google_auth_enabled(realm: Optional[Realm]=None) -> bool:
 
 def github_auth_enabled(realm: Optional[Realm]=None) -> bool:
     return auth_enabled_helper(['GitHub'], realm)
+
+def saml_auth_enabled(realm: Optional[Realm]=None) -> bool:
+    return auth_enabled_helper(['SAML'], realm)
 
 def remote_auth_enabled(realm: Optional[Realm]=None) -> bool:
     return auth_enabled_helper(['RemoteUser'], realm)
@@ -557,10 +561,50 @@ class GitHubAuthBackend(SocialAuthMixin, GithubOAuth2):
 
         return user_profile
 
+class SAMLAuthBackend(SocialAuthMixin, SAMLAuth):
+    auth_backend_name = "SAML"
+    
+    def get_email_address(self, *args: Any, **kwargs: Any) -> Optional[Text]:
+        try:
+            return kwargs['response']['email']
+        except KeyError:  # nocoverage # TODO: investigate
+            return None
+
+    def get_full_name(self, *args: Any, **kwargs: Any) -> Text:
+        # In case of any error return an empty string. Name is used by
+        # the registration page to pre-populate the name field. However,
+        # if it is not supplied, our registration process will make sure
+        # that the user enters a valid name.
+        try:
+            name = kwargs['response']['name']
+        except KeyError:
+            name = ''
+
+        if name is None:
+            return ''
+
+        return name
+    
+    def get_authenticated_user(self, *args: Any, **kwargs: Any) -> Optional[UserProfile]:
+        user_profile = None
+        
+        try:
+            print('pass')
+            # self.strategy.set_request_data({'idp': 'testshib'}, self.backend)
+            args['idp'] = 'testshib'
+            SAMLAuth.get_idp(self, 'testshib')
+            user_profile = SAMLAuth.do_auth(self, *args, **kwargs)
+        except AuthFailed:
+            logging.info("User authentication failed.")
+            user_profile = None
+        
+        return user_profile
+
 AUTH_BACKEND_NAME_MAP = {
     'Dev': DevAuthBackend,
     'Email': EmailAuthBackend,
     'GitHub': GitHubAuthBackend,
+    'SAML': SAMLAuthBackend,
     'Google': GoogleMobileOauth2Backend,
     'LDAP': ZulipLDAPAuthBackend,
     'RemoteUser': ZulipRemoteUserBackend,

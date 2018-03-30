@@ -18,6 +18,7 @@ from django.views.decorators.http import require_GET
 from django.utils.translation import ugettext as _
 from django.utils.http import is_safe_url
 from django.core import signing
+from social_django.utils import load_backend, load_strategy
 import urllib
 from typing import Any, Dict, List, Optional, Tuple, Text
 
@@ -37,7 +38,7 @@ from zerver.signals import email_on_new_login
 from zproject.backends import password_auth_enabled, dev_auth_enabled, \
     github_auth_enabled, google_auth_enabled, ldap_auth_enabled, \
     ZulipLDAPConfigurationError, ZulipLDAPAuthBackend, email_auth_enabled, \
-    remote_auth_enabled
+    remote_auth_enabled, saml_auth_enabled
 from version import ZULIP_VERSION
 
 import hashlib
@@ -299,6 +300,18 @@ def oauth_redirect_to_root(request: HttpRequest, url: Text, is_signup: bool=Fals
 
     return redirect(main_site_uri + '?' + urllib.parse.urlencode(params))
 
+# TODO!
+def saml_metadata_view(request):
+    complete_url = reverse('social:complete', args=("saml", ))
+    saml_backend = load_backend(
+        load_strategy(request),
+        "saml",
+        redirect_uri=complete_url,
+    )
+    metadata, errors = saml_backend.generate_metadata_xml()
+    if not errors:
+        return HttpResponse(content=metadata, content_type='text/xml')
+
 def start_google_oauth2(request: HttpRequest) -> HttpResponse:
     url = reverse('zerver.views.auth.send_oauth_request_to_google')
 
@@ -313,6 +326,15 @@ def start_social_login(request: HttpRequest, backend: Text) -> HttpResponse:
     if (backend == "github") and not (settings.SOCIAL_AUTH_GITHUB_KEY and
                                       settings.SOCIAL_AUTH_GITHUB_SECRET):
         return redirect_to_config_error("github")
+    
+    if (backend == "saml") and not (settings.SOCIAL_AUTH_SAML_SP_ENTITY_ID and
+                                    settings.SOCIAL_AUTH_SAML_SP_PUBLIC_CERT and
+                                    settings.SOCIAL_AUTH_SAML_ORG_INFO and
+                                    settings.SOCIAL_AUTH_SAML_TECHNICAL_CONTACT and
+                                    settings.SOCIAL_AUTH_SAML_SUPPORT_CONTACT and
+                                    settings.SOCIAL_AUTH_SAML_ENABLED_IDPS and
+                                    settings.SOCIAL_AUTH_SAML_SP_PRIVATE_KEY):
+        return redirect_to_config_error("saml")
 
     return oauth_redirect_to_root(request, backend_url)
 
@@ -737,6 +759,7 @@ def get_auth_backends_data(request: HttpRequest) -> Dict[str, Any]:
         "dev": dev_auth_enabled(realm),
         "email": email_auth_enabled(realm),
         "github": github_auth_enabled(realm),
+        "saml": saml_auth_enabled(realm),
         "google": google_auth_enabled(realm),
         "remoteuser": remote_auth_enabled(realm),
         "ldap": ldap_auth_enabled(realm),

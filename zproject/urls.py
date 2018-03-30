@@ -457,6 +457,11 @@ i18n_urls = [
         zerver.views.registration.accounts_home_from_multiuse_invite,
         name='zerver.views.registration.accounts_home_from_multiuse_invite'),
 
+    # TODO!!!
+    # SAML XML metadata
+    url(r'^saml/xml/', zerver.views.auth.saml_metadata_view,
+        name='zerver.views.auth.saml_metadata_view'),
+
     # API and integrations documentation
     url(r'^integrations/doc-html/(?P<integration_name>[^/]*)$',
         zerver.views.integrations.integration_doc,
@@ -488,6 +493,9 @@ i18n_urls = [
     url(r'^config-error/github$', TemplateView.as_view(
         template_name='zerver/config_error.html',),
         {'github_error': True},),
+    url(r'^config-error/saml$', TemplateView.as_view(
+        template_name='zerver/config_error.html',),
+        {'saml_error': True},),
     url(r'^config-error/smtp$', TemplateView.as_view(
         template_name='zerver/config_error.html',),
         {'smtp_error': True},),

@@ -139,6 +139,14 @@ DEFAULT_SETTINGS = {
     'SOCIAL_AUTH_GITHUB_ORG_NAME': None,
     'SOCIAL_AUTH_GITHUB_TEAM_ID': None,
 
+    # SAML auth
+    'SOCIAL_AUTH_SAML_SP_ENTITY_ID': None,
+    'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT': None,
+    'SOCIAL_AUTH_SAML_ORG_INFO': None,
+    'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT': None,
+    'SOCIAL_AUTH_SAML_SUPPORT_CONTACT': None,
+    'SOCIAL_AUTH_SAML_ENABLED_IDPS': None,
+
     # Email gateway
     'EMAIL_GATEWAY_PATTERN': '',
     'EMAIL_GATEWAY_LOGIN': None,
@@ -1580,6 +1588,12 @@ SOCIAL_AUTH_GITHUB_ORG_KEY = SOCIAL_AUTH_GITHUB_KEY
 SOCIAL_AUTH_GITHUB_ORG_SECRET = SOCIAL_AUTH_GITHUB_SECRET
 SOCIAL_AUTH_GITHUB_TEAM_KEY = SOCIAL_AUTH_GITHUB_KEY
 SOCIAL_AUTH_GITHUB_TEAM_SECRET = SOCIAL_AUTH_GITHUB_SECRET
+
+########################################################################
+# SAML AUTHENTICATION SETTINGS
+########################################################################
+
+SOCIAL_AUTH_SAML_SP_PRIVATE_KEY = get_secret('social_auth_saml_sp_private_key')
 
 ########################################################################
 # EMAIL SETTINGS

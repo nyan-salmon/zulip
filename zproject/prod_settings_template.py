@@ -102,6 +102,7 @@ AUTHENTICATION_BACKENDS = (
     'zproject.backends.EmailAuthBackend',  # Email and password; just requires SMTP setup
     # 'zproject.backends.GoogleMobileOauth2Backend',  # Google Apps, setup below
     # 'zproject.backends.GitHubAuthBackend',  # GitHub auth, setup below
+    # 'zproject.backends.SAMLAuthBackend',  # SAML auth, setup below
     # 'zproject.backends.ZulipLDAPAuthBackend',  # LDAP, setup below
     # 'zproject.backends.ZulipRemoteUserBackend',  # Local SSO, setup docs on readthedocs
 )
@@ -148,6 +149,14 @@ AUTHENTICATION_BACKENDS = (
 #SOCIAL_AUTH_GITHUB_TEAM_ID = <your team id>
 #SOCIAL_AUTH_GITHUB_ORG_NAME = <your org name>
 
+# TODO: !!
+# To set up SAML authentication, you'll need to do the following:
+#'SOCIAL_AUTH_SAML_SP_ENTITY_ID': None,
+#'SOCIAL_AUTH_SAML_SP_PUBLIC_CERT': None,
+#'SOCIAL_AUTH_SAML_ORG_INFO': None,
+#'SOCIAL_AUTH_SAML_TECHNICAL_CONTACT': None,
+#'SOCIAL_AUTH_SAML_SUPPORT_CONTACT': None,
+#'SOCIAL_AUTH_SAML_ENABLED_IDPS': None,
 
 # If you are using the ZulipRemoteUserBackend authentication backend,
 # set this to your domain (e.g. if REMOTE_USER is "username" and the
